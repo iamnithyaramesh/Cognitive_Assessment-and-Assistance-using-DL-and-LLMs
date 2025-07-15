@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dementia Test</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-white font-sans flex flex-col items-center py-10 px-4">
+  <div class="text-center mb-10">
+    <h1 class="text-4xl md:text-5xl font-extrabold text-blue-900 drop-shadow-sm tracking-tight">
+    
+      Addenbrooke's Dementia Analysis Test
+    </h1>
+    <p class="text-lg text-gray-700 mt-3 italic">Visuospatial / Perceptive Abilities</p>
+  </div>
+  <div class="relative z-10 bg-white bg-opacity-90 backdrop-blur-md rounded-3xl shadow-2xl p-10 text-center max-w-4xl w-11/12 space-y-6 transition-all">
+  <!-- Task 1 -->
+  <div class="border-b border-gray-300 pb-6">
+    <button class="text-xl font-semibold text-blue-700 hover:text-blue-900 transition-all"
+            onclick="this.nextElementSibling.classList.toggle('hidden')">
+      Intersecting Infinity Loops
+    </button>
+    <div id="task1" class="hidden px-6 py-4 space-y-4">
+      <p>Draw two infinity loops intersecting at the center.</p>
+      <img src="static\ref.png" id="preview1" class="w-48 mt-2 rounded-lg shadow"  />
+      <input type="file" accept="image/*" id= "InfinityInput" onchange="previewImage(event, 'preview1')" class="block">
+      
+      
+      <button onclick="uploadDoubleInfinityImage()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md">
+        Upload Image
+      </button>
+  
+      <p id="result1" class="text-sm text-gray-700"></p>
+    </div>
+  </div>
+   <!-- Task 1 -->
+   <div class="border-b border-gray-300 pb-6">
+    <button class="text-xl font-semibold text-blue-700 hover:text-blue-900 transition-all"
+            onclick="this.nextElementSibling.classList.toggle('hidden')">
+      3D Wire Frame Cube
+    </button>
+    <div id="task2" class="hidden px-6 py-4 space-y-4">
+      <p>Draw a cube given to the image on a clean sheet of paper.</p>
+      <img src = "static\reference.png" id="preview2" class="w-48 mt-2 rounded-lg shadow" />
+      <input type="file" accept="image/*" id= "CubeInput" onchange="previewImage(event, 'preview2')" class="block">
+      
+      <button onclick="uploadCubeImage()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md">
+        Upload Image
+      </button>
+  
+      <p id="result2" class="text-sm text-gray-700"></p>
+    </div>
+  </div>
+
+  
+
+
+<!-- Task 3: Clock Drawing -->
+<div class="border-b border-gray-300 pb-6">
+  <button onclick="toggleSection('task3')" class="text-xl font-semibold text-blue-700 hover:text-blue-900 transition-all">
+    Clock Drawing
+  </button>
+  <div id="task3" class="hidden px-6 py-4 space-y-4">
+    <p>Draw a perfectly circular clock with numbers marked correctly, and the hands pointing to 11:10.</p>
+
+    <input type="file" accept="image/*" id="clockImageInput" onchange="previewImage(event, 'preview3')" class="block">
+    <img id="preview3" class="w-48 mt-2 rounded-lg shadow" style="display:none;" />
+
+    <button onclick="uploadClockImage()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md">
+      Upload Image
+    </button>
+
+    <p id="result3" class="text-sm text-gray-700"></p>
+  </div>
+</div>
+
+
+
+  <!-- Task 4 -->
+  <div class="border-b border-gray-300 pb-6">
+    <button class="text-xl font-semibold text-blue-700 hover:text-blue-900 transition-all" onclick="this.nextElementSibling.classList.toggle('hidden')">
+      Alphabet Distortion Test
+    </button>
+    <div id="task4" class="hidden px-6 py-4 space-y-6">
+      <p class="text-lg font-semibold">Alphabet Distortion Test</p>
+    
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- Card 1 -->
+        <div class="bg-white shadow-md rounded-md p-4 text-center">
+          <img src="static\A_distorted.png" alt="Distorted Letter 1" class="mx-auto mb-2 h-24 object-contain">
+          <input type="text" id="input1" placeholder="Your guess" class="w-full px-3 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500">
+        </div>
+    
+        <!-- Card 2 -->
+        <div class="bg-white shadow-md rounded-md p-4 text-center">
+          <img src="static\N_distorted.png" alt="Distorted Letter 2" class="mx-auto mb-2 h-24 object-contain">
+          <input type="text" id="input2" placeholder="Your guess" class="w-full px-3 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500">
+        </div>
+    
+        <!-- Card 3 -->
+        <div class="bg-white shadow-md rounded-md p-4 text-center">
+          <img src="static\V_distorted.png" alt="Distorted Letter 3" class="mx-auto mb-2 h-24 object-contain">
+          <input type="text" id="input3" placeholder="Your guess" class="w-full px-3 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500">
+        </div>
+    
+        <!-- Card 4 -->
+        <div class="bg-white shadow-md rounded-md p-4 text-center">
+          <img src="static\C_distorted.png" alt="Distorted Letter 4" class="mx-auto mb-2 h-24 object-contain">
+          <input type="text" id="input4" placeholder="Your guess" class="w-full px-3 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500">
+        </div>
+      </div>
+    
+      <button onclick="submitAlphabetAnswer()" 
+              class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md mt-4">
+        Submit Answer
+      </button>
+      <p id="result4" class="text-sm text-gray-700"></p>
+
+
+<!-- Scripts -->
+<script>
+  function toggleSection(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('hidden');
+  }
+
+  function previewImage(event, imgId) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const img = document.getElementById(imgId);
+      img.src = e.target.result;
+      img.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function uploadFile(button, resultId) {
+    const container = button.closest('div');
+    const input = container.querySelector('input[type="file"]');
+    const file = input.files[0];
+    const resultText = document.getElementById(resultId);
+
+    if (!file) {
+      alert("Please select a file.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    fetch("http://localhost:8000/predict", {
+      method: "POST",
+      body: formData,
+    })
+      .then(res => res.json())
+      .then(data => {
+        resultText.innerText = "Prediction: " + (data.predicted_class || data.score);
+      })
+      .catch(err => {
+        resultText.innerText = "Upload failed.";
+      });
+  }
+
+  function submitAlphabetAnswer() {
+    const correctAnswers = ['A', 'N', 'V', 'C'];
+    let score = 0;
+
+    for (let i = 1; i <= 4; i++) {
+      const userInput = document.getElementById(`input${i}`).value.trim().toUpperCase();
+      if (userInput === correctAnswers[i - 1]) {
+        score++;
+      }
+    }
+
+    document.getElementById('result4').textContent = `You scored ${score} out of 4.`;
+  }
+  function uploadClockImage() {
+    const input = document.getElementById('clockImageInput');
+    const file = input.files[0];
+    const resultText = document.getElementById("result3");
+
+    if (!file) {
+      alert("Please select a file.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    fetch("/predict", {
+      method: "POST",
+      body: formData,
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.predicted_class !== undefined) {
+          resultText.innerText = `Score for the given image: ${data.predicted_class}`;
+        } else {
+          resultText.innerText = `Error: ${data.error || 'Prediction failed.'}`;
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        resultText.innerText = "Prediction failed.";
+      });
+  }
+
+  // 🔁 NEW FUNCTION FOR INTERSECTING INFINITY LOOPS
+  function uploadDoubleInfinityImage() {
+    const input = document.getElementById('InfinityInput');
+    const file = input.files[0];
+    const resultText = document.getElementById("result1");
+
+    if (!file) {
+      alert("Please select a file.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    fetch("/predict-double-infinity/", {
+      method: "POST",
+      body: formData,
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.result !== undefined) {
+          resultText.innerText = `Score for the given image: ${data.result}`;
+        } else {
+          resultText.innerText = `Error: ${data.error || 'Prediction failed.'}`;
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        resultText.innerText = "Prediction failed.";
+      });
+  }
+
+
+  function uploadCubeImage() {
+  const input = document.getElementById("CubeInput");
+  const result = document.getElementById("result2");
+
+  if (!input.files || !input.files[0]) {
+    result.textContent = "No file selected.";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", input.files[0]);
+
+  fetch("/predict-cube/", {
+    method: "POST",
+    body: formData
+  })
+    .then(response => response.json())
+    .then(data => {
+      result.textContent = "Result: " + data.result;
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      result.textContent = "Error processing the image.";
+    });
+}
+</script>

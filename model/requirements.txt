@@ -1,0 +1,10 @@
+spacy
+pillow
+opencv-python
+numpy
+fuzzywuzzy
+torch
+matplotlib
+scikit-image
+pandas
+torchvision

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fluency Test</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-white font-sans flex flex-col items-center py-10 px-4">
+  <div class="text-center mb-10">
+    <h1 class="text-4xl md:text-5xl font-extrabold text-blue-900 drop-shadow-sm tracking-tight">
+      Addenbrooke's Dementia Analysis Test
+    </h1>
+    <p class="text-lg text-gray-700 mt-3 italic">Fluency</p>
+  </div>
+
+  <div class="relative z-10 bg-white bg-opacity-90 backdrop-blur-md rounded-3xl shadow-2xl p-10 text-center max-w-4xl w-11/12 space-y-6 transition-all">
+    <div class="space-y-6">
+      
+      <!-- Letter and Category Section -->
+      <div class="border-b border-gray-300 pb-6">
+        <button 
+          class="text-xl font-semibold text-blue-700 hover:text-blue-900 transition-all" 
+          onclick="toggleSection(this, 'letterSection', 'letterTimer')">
+          Letter and Category
+        </button>
+        <div id="letterSection" class="text-left space-y-4 pt-4 hidden">
+          <p class="text-gray-700">
+            You will be shown a letter and a category. List as many valid words as you can in 60 seconds.
+          </p>
+          <p id="letterTimer" class="text-lg font-semibold text-red-600">Time left: 1:00</p>
+          <p id="randomLetterDisplay" class="text-lg font-bold text-blue-600">Letter: </p>
+          <div class="space-y-2">
+            <div class="space-y-2">
+              <button id="recordBtn" onclick="toggleRecording()" class="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-xl shadow transition-all">
+                Start Recording
+              </button>
+              <p id="recordStatus" class="text-gray-600 text-sm">Not recording</p>
+            </div>
+        
+            <div class="mt-4">
+              <button id="uploadBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-xl shadow transition-all hidden" onclick="uploadAudio()">
+                Submit Audio
+              </button>
+              <div id="nounsResult" class="text-green-700 font-semibold hidden whitespace-pre-wrap mt-3"></div>
+            </div>
+          </div>
+        </div>
+        </div> 
+
+      <!-- Animals Section -->
+      <div class="border-b border-gray-300 pb-6">
+        <button 
+          class="text-xl font-semibold text-blue-700 hover:text-blue-900 transition-all" 
+          onclick="toggleSection(this, 'animalSection', 'animalTimer')">
+          Animals
+        </button>
+        <div id="animalSection" class="text-left space-y-4 pt-4 hidden">
+          <p class="text-gray-700">
+            Try naming as many different animals as you can in 60 seconds. This evaluates semantic fluency.
+          </p>
+          <p id="animalTimer" class="text-lg font-semibold text-red-600">Time left: 1:00</p>
+          <div class="space-y-2">
+            <textarea id="animalInputBox" rows="4" class="w-full p-3 border border-gray-300 rounded-xl" placeholder="Start typing animal names here, separated by spaces..." disabled></textarea>
+            <button id="animalSubmitBtn" onclick="submitAnimalText()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-xl shadow transition-all" disabled>
+              Submit
+            </button>
+            <div id="animalResult" class="text-green-700 font-semibold hidden whitespace-pre-wrap"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script>
+    let currentLetter = '';
+    let timers = {
+      letter: { interval: null, time: 60, started: false },
+      animal: { interval: null, time: 60, started: false }
+    };
+
+    function toggleSection(btn, sectionId, timerId) {
+      const section = document.getElementById(sectionId);
+      section.classList.toggle("hidden");
+
+      if (!section.classList.contains("hidden")) {
+        if (sectionId === 'letterSection' && !timers.letter.started) {
+          fetchRandomLetter();
+          startTimer('letter', timerId);
+        } else if (sectionId === 'animalSection' && !timers.animal.started) {
+          startTimer('animal', timerId);
+          document.getElementById("animalInputBox").disabled = false;
+        }
+      }
+    }
+
+    function startTimer(key, displayId) {
+      const timer = timers[key];
+      timer.started = true;
+
+      const display = document.getElementById(displayId);
+      timer.interval = setInterval(() => {
+        if (timer.time <= 0) {
+          clearInterval(timer.interval);
+          display.innerText = "Time's up!";
+          if (key === 'animal') {
+            document.getElementById("animalInputBox").disabled = true;
+            document.getElementById("animalSubmitBtn").disabled = false;
+          }
+          return;
+        }
+
+        timer.time--;
+        const minutes = Math.floor(timer.time / 60);
+        const seconds = String(timer.time % 60).padStart(2, '0');
+        display.innerText = `Time left: ${minutes}:${seconds}`;
+      }, 1000);
+    }
+
+    async function fetchRandomLetter() {
+      try {
+        const res = await fetch('/random_letter');
+        const data = await res.json();
+        currentLetter = data.letter;
+        document.getElementById('randomLetterDisplay').innerText = `Letter: ${currentLetter}`;
+      } catch (err) {
+        console.error('Failed to fetch random letter:', err);
+        currentLetter = '';
+        document.getElementById('randomLetterDisplay').innerText = 'Letter: N/A';
+      }
+    }
+
+    let mediaRecorder;
+  let audioChunks = [];
+  let recordingTimer = null;
+  let recordingTimeLeft = 120; // 2 minutes
+
+  function toggleAudioSection(btn, sectionId, timerId) {
+    const section = document.getElementById(sectionId);
+    section.classList.toggle("hidden");
+
+    if (!section.classList.contains("hidden") && !recordingTimer) {
+      startRecordingTimer(timerId);
+    }
+  }
+
+  function startRecordingTimer(displayId) {
+    const display = document.getElementById(displayId);
+
+    recordingTimer = setInterval(() => {
+      if (recordingTimeLeft <= 0) {
+        clearInterval(recordingTimer);
+        display.innerText = "Time's up!";
+        stopRecording();
+        return;
+      }
+
+      recordingTimeLeft--;
+      const minutes = Math.floor(recordingTimeLeft / 60);
+      const seconds = String(recordingTimeLeft % 60).padStart(2, '0');
+      display.innerText = `Time left: ${minutes}:${seconds}`;
+    }, 1000);
+  }
+
+  function toggleRecording() {
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+      startRecording();
+    } else if (mediaRecorder.state === 'recording') {
+      stopRecording();
+    }
+  }
+
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+
+      audioChunks = [];
+      mediaRecorder.ondataavailable = e => {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+
+      mediaRecorder.onstart = () => {
+        document.getElementById("recordStatus").innerText = "Recording...";
+        document.getElementById("recordBtn").innerText = "Stop Recording";
+      };
+
+      mediaRecorder.onstop = () => {
+        document.getElementById("recordStatus").innerText = "Recording stopped.";
+        document.getElementById("recordBtn").innerText = "Start Recording";
+        document.getElementById("uploadBtn").classList.remove("hidden");
+      };
+
+      mediaRecorder.start();
+    } catch (err) {
+      alert("Error accessing microphone: " + err.message);
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+    }
+    clearInterval(recordingTimer);
+  }
+
+  async function uploadAudio() {
+    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+    const formData = new FormData();
+    formData.append("file", blob, "fluency_audio.wav");
+
+    try {
+      const response = await fetch('/predict_audio', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+      const resultEl = document.getElementById("nounsResult");
+
+      if (data.error) {
+        resultEl.innerText = "Error: " + data.error;
+      } else {
+        let display = `Score: ${data.score || 0}`;
+        if (data.valid_words?.length) {
+          display += `\nValid Words: ${data.valid_words.join(', ')}`;
+        }
+        resultEl.innerText = display;
+      }
+
+      resultEl.classList.remove("hidden");
+    } catch (err) {
+      alert("Upload failed: " + err.message);
+    }
+  }
+
+    function submitAnimalText() {
+      const words = document.getElementById("animalInputBox").value;
+      
+      fetch('/animals/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: words })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const resultEl = document.getElementById("animalResult");
+
+        if (data.error) {
+          resultEl.innerText = "Error: " + data.error;
+        } else {
+          let display = data.predicted_class || "No score returned.";
+          if (data.valid_animals?.length) {
+            display += `\nAnimals: ${data.valid_animals.join(', ')}`;
+          }
+          resultEl.innerText = display;
+        }
+
+        resultEl.classList.remove("hidden");
+      })
+      .catch(err => {
+        console.error(err);
+        const resultEl = document.getElementById("animalResult");
+        resultEl.innerText = "An error occurred.";
+        resultEl.classList.remove("hidden");
+      });
+    }
+  </script>
+</body>
+</html>
