@@ -37,6 +37,7 @@ max_warnings = 3
 response_times = []
 correct_streak = 0
 max_streak = 0
+pending_warning = False  # Track if a warning was just issued
 
 print("Test is starting...\n")
 time.sleep(1)
@@ -49,6 +50,7 @@ while True:
         if cue1_triggered_count >= cue1_stop_delay:
             cue1_ready = True
         if cue1_ready:
+            pending_warning = True
             stop_warnings += 1
             print("You can STOP now\n")
         if len(used_cues_1) == len(cue_list_1):
@@ -57,40 +59,53 @@ while True:
 
     elif cue2_active and current in cue_list_2 and current not in used_cues_2:
         used_cues_2.add(current)
+        pending_warning = True
         stop_warnings += 1
         print("Warning! You can STOP now\n")
 
-    # --- Ask the subtraction question ---
-    start_time = time.time()
-    user_input = input(f"What is {current} - 7? : ")
-    end_time = time.time()
-    response_time = round(end_time - start_time, 2)
-    response_times.append(response_time)
+    # --- Ask until correct ---
+    while True:
+        start_time = time.time()
+        user_input = input(f"What is {current} - 7? : ")
+        end_time = time.time()
+        response_time = round(end_time - start_time, 2)
+        response_times.append(response_time)
 
-    # Allow user to manually stop
-    if user_input.strip().lower() in ["stop", "end", "quit"]:
-        print("\nStopping test as requested.")
+        # Allow manual stop
+        if user_input.strip().lower() in ["stop", "end", "quit"]:
+            print("\nStopping test as requested.")
+            current = -1  # Force exit
+            break
+
+        if not user_input.isdigit():
+            print(" Please enter a number.\n")
+            continue
+
+        answer = int(user_input)
+        expected = current - 7
+
+        if answer == expected:
+            score += 1
+            correct_streak += 1
+            max_streak = max(max_streak, correct_streak)
+            print("Correct!\n")
+            current = answer
+            break  # Exit retry loop and go to next number
+        else:
+            correct_streak = 0
+            print(f"Incorrect. Try again.\n")
+            score -= 1
+
+    # Exit if user stopped manually
+    if current < 0:
         break
 
-    if not user_input.isdigit():
-        print(" Please enter a number.\n")
-        continue
-
-    answer = int(user_input)
-    expected = current - 7
-
-    if answer == expected:
-        score += 1
-        correct_streak += 1
-        max_streak = max(max_streak, correct_streak)
-        print("Correct!\n")
-    else:
-        correct_streak = 0
-        print(f"Incorrect. The correct answer was {expected}.\n")
+    # Penalty for ignoring stop cue
+    if pending_warning:
         score -= 1
+        pending_warning = False
 
-    current = expected
-
+    # End conditions
     if current < 7 or stop_warnings >= max_warnings:
         print("Task Complete!")
         break
